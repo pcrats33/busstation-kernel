@@ -1,0 +1,78 @@
+    Airport Shuttle Service v1.0
+    ----------------------------
+    Developers:
+      Rick Tilley
+      Alexander Morehouse
+
+    Date:
+      11/04/13
+
+    Summary:
+      The syscalls, start_shuttle(), issue_request(), and stop_shuttle(), each
+      respectively control the shuttle. They all point to respective functions
+      in our kernel module mybus.ko which start the shuttle moving, add people
+      to queues at different terminals, and stop the shuttle. Other functions
+      in the module initialize the data structs when the module is inserted and
+      clean up the dynamic memory when the module is removed.
+
+    How to compile:
+      First, become root and navigate to the directory which the linux source
+      is located in. From here, add the syscalls: start_shuttle, issue_request,
+      and stop_shuttle to the end of the list of 64 bit syscalls, setting the
+      abi to "common" in the arch/x86/syscalls/syscall_64.tbl file. After that,
+      add the following prototypes to the include/linux/syscalls.h file right
+      before the the "#endif": 
+        asmlinkage int sys_start_shuttle(void);
+        asmlinkage int sys_issue_request(char passenger_type, int 
+          initial_terminal, int destination_terminal);
+        asmlinkage int sys_stop_shuttle(void);
+      Then, create a new subdirectory within your linux source directory and 
+      place into it the following files:
+        bus_syscalls.c
+        makesys  (change name to "Makefile" once in correct directory)
+      After this, add the name of this subdirectory to the end of the "core-y"
+      line in the Makefile of your linux kernel. You then need to recompile the
+      kernel with a "make", followed by doing a "make install" and then a
+      "reboot" before installing the module with the code behind the syscalls.
+      Next, create another new subdirectory within your linux source directory 
+      and place into it the following files:
+        busdepot.h
+        mybus.c
+        makemod  (change name to "Makefile" once in correct directory)
+      Then, "make" that directory and add the module with "insmod mybus.ko".
+      The remaining files, busstart.c, waiter.c, and busstop.c, can be made in
+      a seperate directory with the makedrv file (which should be changed to 
+      "Makefile" when placed in the correct directory).
+
+    Settings/Parameters to be changed:
+      In busstart.c, busstop.c, and waiter.c, the first parameter of the
+      syscall() functions must be changed to match the number that it is listed
+      as in the LD/arch/x86/syscalls/syscall_64.tbl file.
+
+    List of files:  ** note these files have been split into two archives
+                    ** see proj2drv.tar and proj2mod.tar for files relating to
+                    ** test drivers, and module/syscall files respectively.
+      bus_syscalls.c	defines the syscalls start_shuttle(), issue_request(),
+			and stop_shuttle() which simply contain function
+			pointers to their counterparts in the mybus module 
+      makesys		the Makefile for the subdirectory of the linux source
+			directory which contains the bus_syscalls.c, (change
+			name to "Makefile" after putting it in this directory)
+      busdepot.h	declares the function prototypes and defines the
+			structs used in mybus.c
+      mybus.c		defines the functions declared within busdepot.h and 
+			sets the module_init() and module_exit() functions
+      makemod		the Makefile for the subdirectory of the linux source
+			directory which contains the code for the kernel module
+			(change name to "Makefile" after putting it into this
+			directory) 
+      busstart.c	testfile that calls the shuttle_start syscall
+      waiter.c		testfile that calls the issue_request syscall, using
+			command line parameters as the parameters for the
+			syscall
+      busstop.c		testfile that calls the shuttle_stop syscall
+      makedrv		the Makefile for the testfiles (change name to 
+			"Makefile" when placed in the desired directory)
+
+    Known bugs:
+      -- none (currently)

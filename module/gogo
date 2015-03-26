@@ -1,0 +1,4 @@
+#!/bin/bash
+insmod mybus.ko 
+watch -n 0.2 'cat /proc/mybus'
+
